@@ -21,3 +21,14 @@ async def info():
         "app_name": "FastAPI框架学习",
         "app_version": "v0.0.1"
     }
+    
+@app.post("/info")
+async def post_info():
+    """
+    项目信息
+    :return:
+    """
+    return {
+        "app_name": "FastAPI框架学习",
+        "app_version": "v0.0.1"
+    }
