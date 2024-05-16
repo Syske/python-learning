@@ -42,8 +42,8 @@ def batch_load(total_page):
             time.sleep(0.5) 
         
 def get_single_page(pageNum):
-# url = f'http://367hsck.cc/'
-    url = f'http://777893.xyz/'
+# url = f'http://.cc/'
+    url = f'http://.xyz/'
     headers = {
         "User-Agent": "Mozilla/5.0 (Linux; Android 13; MEIZU 18s Build/TKQ1.221114.001) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.5563.116 Mobile Safari/537.36"
     }

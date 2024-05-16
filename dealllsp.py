@@ -26,7 +26,7 @@ def build_content(datas):
     return content
 
 def batch_load(total_page):
-    file_priex = "pwxxx"
+    file_priex = "llsq"
     file_dir = f"./{file_priex}/{file_priex}"
     file_name = "{}.md"
     
@@ -48,9 +48,8 @@ def batch_load(total_page):
             time.sleep(0.5) 
         
 def get_single_page(pageNum):
-    base_url = f'https://.fun'
-
-    url = f'{base_url}/pwxxx/vod/type/id/1/page/{pageNum}.html'
+    base_url = f'https://.xyz'
+    url = f'{base_url}/llsq/index.php/vod/type/id/1/page/{pageNum}.html'
     headers = {
         "User-Agent": "Mozilla/5.0 (Linux; Android 13; MEIZU 18s Build/TKQ1.221114.001) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.5563.116 Mobile Safari/537.36"
     }
@@ -68,7 +67,7 @@ def get_single_page(pageNum):
     # print(dir(response))
 
     selector1 = parsel.Selector(response.text)
-    contents = selector1.css('.stui-vodlist')
+    contents = selector1.css('.content-list')
     # print(contents[0].get())
     index = 1
     datas = []
@@ -78,13 +77,12 @@ def get_single_page(pageNum):
         # print(content.get())
         # if index > 2:
             # print(content.get())
-        href = base_url + content.css('li > .stui-vodlist__box > a::attr(href)').get()
+        href = base_url + content.css('li > a::attr(href)').get()
         print(href)
-        # img_url = content.css('li > stui-vodlist__box > a > img::attr(src)').get()
-        img_url = content.css('li > .stui-vodlist__box > a::attr(data-original)').get()
-        # img_url = matchValue(r"url\((.+)\)", img_url, 1)
+        img_url = content.css('li > a > img::attr(src)').get()
+    
         print(img_url)
-        title = content.css('li > .stui-vodlist__box > a::attr(title)').get()
+        title = content.css('li > a::attr(title)').get()
         print(title)
         if title != None:
             datas.append((title, href, img_url))
@@ -93,4 +91,4 @@ def get_single_page(pageNum):
         
 if __name__ == "__main__":
     # get_single_page(1)
-    batch_load(3009)
+    batch_load(171)
