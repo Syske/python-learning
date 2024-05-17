@@ -1,9 +1,10 @@
+
 import requests
 import parsel
 import re
 import urllib3
 import time
-from urllib.parse import urlparse
+import json
 import os
 
 urllib3.disable_warnings()
@@ -45,10 +46,36 @@ def batch_load(total_page):
                     f.write(file_content)
                     file_content = ''
             time.sleep(0.5) 
-        
-def get_single_page(pageNum):
-    base_url = f'https://.xyz'
-    url = f'{base_url}/vodtype/55-{pageNum}.html'
+
+def get_page_info(url, base_url):
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Linux; Android 13; MEIZU 18s Build/TKQ1.221114.001) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.5563.116 Mobile Safari/537.36"
+    }
+    # response = requests.get(url=f"{url}vodtype/2-{pageNum}.html", headers=headers, verify=False)
+    response = requests.get(url=f"{url}", headers=headers, verify=False)
+    response.encoding="utf-8"
+    selector1 = parsel.Selector(response.text)
+    contents = selector1.css('.myui-panel-box .tab-pane > ul')
+    # body > div.container > div > div.col-lg-wide-75.col-md-wide-7.col-xs-1.padding-0 > div:nth-child(2) > div > div:nth-child(2) > div.myui-content__detail > h1
+    page_title = selector1.css('.myui-content__detail h1::text').get()
+    # print(contents[0].get())
+    url_datas = []
+    for content in contents:
+        datas = []
+        lists = content.css("li > a")
+        for li in lists:
+            href = ''
+            if base_url != None:
+                href = base_url + li.css('a::attr(href)').get()
+            else:
+                href = li.css('a::attr(href)').get()
+            title = li.css("a::text").get()
+            datas.append((title, href))
+        url_datas.append(datas)
+    return url_datas, page_title
+            
+def get_single_page(page_url):
+    url = page_url
     headers = {
         "User-Agent": "Mozilla/5.0 (Linux; Android 13; MEIZU 18s Build/TKQ1.221114.001) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.5563.116 Mobile Safari/537.36"
     }
@@ -63,31 +90,26 @@ def get_single_page(pageNum):
     # print(parsed_url.path)
     # response = requests.get(url=page_url + parsed_url.path + "&p=/", headers=headers, verify=False)
     # print(response.text)
+    # open('test.html', mode='w+', encoding='utf-8').write(response.text)
     # print(dir(response))
 
     selector1 = parsel.Selector(response.text)
-    contents = selector1.css('.col-style')
+    contents = selector1.css('.embed-responsive > script::text')
     # print(contents[0].get())
-    index = 1
-    datas = []
-    
-    for content in contents:
-        # content = contents[3]
-        # print(content.get())
-        # if index > 2:
-            # print(content.get())
-        href = base_url + content.css('a::attr(href)').get()
-        print(href)
-        img_url = content.css('a > .videoBox_wrap > div::attr(style)').get()
-        img_url = matchValue(r"url\((.+)\)", img_url, 1)
-        print(img_url)
-        title = content.css('.videoBox-info > span::text').get()
-        print(title)
-        if title != None:
-            datas.append((title, href, img_url))
-        index += 1
-    return datas
+    temp_data = matchValue('var player_aaaa=((.+))', contents[0].get(), 1)
+    # print(temp_data)
+    json_data = json.loads(temp_data)
+    url = json_data['url']
+    url_nex = json_data['url_next']
+    print(url)
+    print(url_nex)
+
+    return url, url_nex
         
 if __name__ == "__main__":
-    # get_single_page(1)
-    batch_load(342)
+    base_url = "https://m.iuys.cc"
+    url = f'{base_url}/voddetail/4184.html'
+    url_datas,title = get_page_info(url=url, base_url=base_url)
+    # print(url_datas, title)
+    get_single_page(url_datas[0][0][1])
+    # batch_load(342)

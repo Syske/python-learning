@@ -4,7 +4,7 @@ import re
 import time
 
 def get_single_page(pageNum):
-    baseUrl = "https://titiwo.159i1.info"
+    baseUrl = "https://.info"
     url = f"{baseUrl}/video/p{pageNum}.html"
     response = requests.get(url=url)
     selector1 = parsel.Selector(response.text)

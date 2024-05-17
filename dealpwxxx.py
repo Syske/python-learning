@@ -4,6 +4,7 @@ import re
 import urllib3
 import time
 from urllib.parse import urlparse
+import os
 
 urllib3.disable_warnings()
 requests.packages.urllib3.disable_warnings()
@@ -25,7 +26,12 @@ def build_content(datas):
     return content
 
 def batch_load(total_page):
-    file_name = "./hsck/hsck{}.md"
+    file_priex = "pwxxx"
+    file_dir = f"./{file_priex}/{file_priex}"
+    file_name = "{}.md"
+    
+    if not os.path.exists(file_priex):
+        os.mkdir(file_priex)
     
     count = 0
     file_content = ''
@@ -36,18 +42,21 @@ def batch_load(total_page):
             if (i + 1) % 10 == 0 or total_page == i + 1:
                 count += 1
                 # print(file_content)
-                with open(file_name.format(count), 'a+', encoding='utf-8') as f:
+                with open(file_name.format(file_dir, count), 'a+', encoding='utf-8') as f:
                     f.write(file_content)
                     file_content = ''
             time.sleep(0.5) 
         
 def get_single_page(pageNum):
-# url = f'http://.cc/'
-    url = f'http://.xyz/'
+    base_url = f'https://.fun'
+
+    url = f'{base_url}/pwxxx/vod/type/id/1/page/{pageNum}.html'
     headers = {
         "User-Agent": "Mozilla/5.0 (Linux; Android 13; MEIZU 18s Build/TKQ1.221114.001) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.5563.116 Mobile Safari/537.36"
     }
-    response = requests.get(url=f"{url}vodtype/2-{pageNum}.html", headers=headers, verify=False)
+    # response = requests.get(url=f"{url}vodtype/2-{pageNum}.html", headers=headers, verify=False)
+    response = requests.get(url=f"{url}", headers=headers, verify=False)
+    response.encoding="utf-8"
     # print(response.text)
     # page_url = matchValue(r'strU=\s*"([^"]+)', response.text, 1)
     # print(page_url)
@@ -59,26 +68,29 @@ def get_single_page(pageNum):
     # print(dir(response))
 
     selector1 = parsel.Selector(response.text)
-    contents = selector1.css('.stui-vodlist > li > .stui-vodlist__box')
+    contents = selector1.css('.stui-vodlist')
+    # print(contents[0].get())
     index = 1
     datas = []
+    
     for content in contents:
         # content = contents[3]
-        if index > 2:
-
         # print(content.get())
-            pic_info = content.css("a::attr(data-original)")
-
-            title_info = content.css(".stui-vodlist__detail > h4")
-            title = title_info.css("a::text")
-            href = title_info.css("a::attr(href)")
-            print(pic_info.get())
-            print(title.get())
-            print(url + href.get())
-            datas.append((title.get(), url + href.get(), pic_info.get()))
+        # if index > 2:
+            # print(content.get())
+        href = base_url + content.css('li > .stui-vodlist__box > a::attr(href)').get()
+        print(href)
+        # img_url = content.css('li > stui-vodlist__box > a > img::attr(src)').get()
+        img_url = content.css('li > .stui-vodlist__box > a::attr(data-original)').get()
+        # img_url = matchValue(r"url\((.+)\)", img_url, 1)
+        print(img_url)
+        title = content.css('li > .stui-vodlist__box > a::attr(title)').get()
+        print(title)
+        if title != None:
+            datas.append((title, href, img_url))
         index += 1
     return datas
         
 if __name__ == "__main__":
     # get_single_page(1)
-    batch_load(559)
+    batch_load(3009)
