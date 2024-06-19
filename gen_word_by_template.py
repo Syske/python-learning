@@ -8,135 +8,118 @@ from PyQt5.QtCore import Qt
 
 def gen_word_jumin(row):
     # 加载Word文档
-    document = Document('居民模板.docx')
+    document = Document('doc/居民模板.docx')
     # 定位到文档中的第一个表格
     table = document.tables[0]
-    # 用户编号
-    table.cell(0, 1).text = set_val(str(format_number(row['用户编号'])))
-
-    # 如果需要替换多个单元格，可以添加更多的替换操作
-    # 台区编号
-    table.cell(1, 1).text = set_val(str(format_number(row['台区编号'])))
-    # 用户名称
-    table.cell(2, 1).text = set_val(format_number(row['用户名称']))
-    # 用电地址
-    table.cell(3, 1).text = set_val(format_number(row['用电地址']))
-    # 证件号码
-    table.cell(4, 1).text = set_val(str(format_number(row['证件号码'])))
-    # 客户经理姓名
-    table.cell(5, 1).text = set_val(format_number(row['客户经理姓名']))
-    # 客户经理服务电话
-    table.cell(5, 3).text = set_val(str(format_number(row['客户经理服务电话'])))
+    # 基础信息
+    set_base_info(table, row)
 
     # 联系信息
     child_table1 = table.cell(6, 0).tables[0]
-    # 客户本人
-    child_table1.cell(1, 1).text = set_val(format_number(row['联系人']))
-    child_table1.cell(1, 2).text = '客户本人'
-    child_table1.cell(1, 3).text = set_val(str(format_number(row['客户本人'])))
+    # 设置联系人信息
+    set_concat_info(child_table1, row)
 
-    # 财务联系人
-    child_table1.cell(2, 1).text = set_val(format_number(row['联系人.1']))
-    child_table1.cell(2, 2).text = '财务联系人'
-    child_table1.cell(2, 3).text = set_val(str(format_number(row['账务联系人'])))
-
-    # 停送电联系人
-    child_table1.cell(3, 1).text = set_val(format_number(row['联系人.2']))
-    child_table1.cell(3, 2).text = '停送电联系人'
-    child_table1.cell(3, 3).text = set_val(str(format_number(row['停送电联系人'])))
-
-    # 电气联系人
-    child_table1.cell(4, 1).text = set_val(format_number(row['联系人.3']))
-    child_table1.cell(4, 2).text = '电气联系人'
-    child_table1.cell(4, 3).text = set_val(str(format_number(row['电气联系人'])))
-
+    file_name = f"{data_format(row['用户名称'])}_{data_format(row['用户编号'])}.docx"
     # 保存修改后的文档
-    document.save(f'./居民/{row["用户名称"]}.docx')
+    document.save(f'./居民/{file_name}')
+    
+def data_format(data):
+    if str(data).endswith('.0'):
+        return str(data).rstrip('.0')
+    return str(data)
+
     
 def set_alignment_center(cell):
     for paragraph in cell.paragraphs:
         # 设置段落的对齐方式为居中
         paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-def format_number(num):
-    # 检查数字是否为整数或小数部分为0
-    return str(num).rstrip('.0')
-    
-def gen_word_fei_jumin(row):
-    # 加载Word文档
-    document = Document('非居民模板.docx')
-    # 定位到文档中的第一个表格
-    table = document.tables[0]
+
+# 基础信息        
+def set_base_info(table, row):
     # 用户编号
-    table.cell(0, 1).text = set_val(str(format_number(row['用户编号'])))
+    table.cell(0, 1).text = set_val(data_format(row['用户编号']))
 
     # 如果需要替换多个单元格，可以添加更多的替换操作
     # 台区编号
-    table.cell(1, 1).text = set_val(str(format_number(row['台区编号'])))
+    table.cell(1, 1).text = set_val(data_format(row['台区编号']))
     # 用户名称
-    table.cell(2, 1).text = set_val(format_number(row['用户名称']))
+    table.cell(2, 1).text = set_val(data_format(row['用户名称']))
     # 用电地址
-    table.cell(3, 1).text = set_val(format_number(row['用电地址']))
+    table.cell(3, 1).text = set_val(data_format(row['用电地址']))
     # 证件号码
-    table.cell(4, 1).text = set_val(str(format_number(row['证件号码'])))
+    table.cell(4, 1).text = set_val(data_format(row['证件号码']))
     # 客户经理姓名
-    table.cell(5, 1).text = set_val(format_number(row['客户经理姓名']))
+    table.cell(5, 1).text = set_val(data_format(row['客户经理姓名']))
     # 客户经理服务电话
-    table.cell(5, 3).text = set_val(str(format_number(row['客户经理服务电话'])))
+    table.cell(5, 3).text = set_val(data_format(row['客户经理服务电话']))
+ 
+ # 联系信息   
+def set_concat_info(table, row):
+    # 客户本人
+    table.cell(1, 1).text = set_val(data_format(row['联系人']))
+    table.cell(1, 2).text = '客户本人'
+    table.cell(1, 3).text = set_val(data_format(row['客户本人']))
+
+    # 财务联系人
+    table.cell(2, 1).text = set_val(data_format(row['联系人.1']))
+    table.cell(2, 2).text = '财务联系人'
+    table.cell(2, 3).text = set_val(data_format(row['账务联系人']))
+
+    # 停送电联系人
+    table.cell(3, 1).text = set_val(data_format(row['联系人.2']))
+    table.cell(3, 2).text = '停送电联系人'
+    table.cell(3, 3).text = set_val(data_format(row['停送电联系人']))
+
+    # 电气联系人
+    table.cell(4, 1).text = set_val(data_format(row['联系人.3']))
+    table.cell(4, 2).text = '电气联系人'
+    table.cell(4, 3).text = set_val(data_format(row['电气联系人']))
+    
+def gen_word_fei_jumin(row):
+    # 加载Word文档
+    document = Document('doc/非居民模板.docx')
+    # 定位到文档中的第一个表格
+    table = document.tables[0]
+    # 基础信息
+    set_base_info(table, row)
     
     # 证件信息
     child_table = table.cell(6, 0).tables[0]
-    
-    if format_number(row['营业执照']) != None and format_number(row['营业执照']) != 'nan':
+    if str(row['营业执照']) != None and str(row['营业执照']) != 'nan':
         child_table.cell(1, 1).text = '☑'
-        child_table.cell(1, 3).text = str(format_number(row['营业执照']))
+        child_table.cell(1, 3).text = data_format(row['营业执照'])
         # 设置段落的对齐方式为居中
         set_alignment_center(child_table.cell(1, 1))
         
-    if format_number(row['事业单位法人证书']) != None and format_number(row['事业单位法人证书']) != 'nan':
+    if str(row['事业单位法人证书']) != None and str(row['事业单位法人证书']) != 'nan':
         child_table.cell(2, 1).text = '☑'
-        child_table.cell(2, 3).text = str(format_number(row['事业单位法人证书']))
+        child_table.cell(2, 3).text = data_format(row['事业单位法人证书'])
         # 设置段落的对齐方式为居中
         set_alignment_center(child_table.cell(2, 1))
     
-    if format_number(row['统一社会信用代码证']) != None and format_number(row['统一社会信用代码证']) != 'nan':
+    if str(row['统一社会信用代码证']) != None and str(row['统一社会信用代码证']) != 'nan':
         child_table.cell(3, 1).text = '☑'
-        child_table.cell(3, 3).text = str(format_number(row['统一社会信用代码证']))
+        child_table.cell(3, 3).text = data_format(row['统一社会信用代码证'])
         # 设置段落的对齐方式为居中
         set_alignment_center(child_table.cell(3, 1))
         
-    if format_number(row['税务登记证']) != None and format_number(row['税务登记证']) != 'nan':
+    if str(row['税务登记证']) != None and str(row['税务登记证']) != 'nan':
         child_table.cell(4, 1).text = '☑'
-        child_table.cell(4, 3).text = str(format_number(row['税务登记证']))
+        child_table.cell(4, 3).text = data_format(row['税务登记证'])
         # 设置段落的对齐方式为居中
         set_alignment_center(child_table.cell(4, 1))
         
-    if format_number(row['身份证']) != 'nan':
-        child_table.cell(5, 3).text = str(format_number(row['身份证']))
+    if str(row['身份证']) != 'nan':
+        child_table.cell(5, 3).text = data_format(row['身份证'])
 
     child_table1 = table.cell(6, 0).tables[1]
     # 联系信息
-    # 客户本人
-    child_table1.cell(1, 1).text = set_val(format_number(row['联系人']))
-    child_table1.cell(1, 2).text = '客户本人'
-    child_table1.cell(1, 3).text = set_val(str(format_number(row['客户本人'])))
+    # 设置联系人信息
+    set_concat_info(child_table1, row)
 
-    # 财务联系人
-    child_table1.cell(2, 1).text = set_val(format_number(row['联系人.1']))
-    child_table1.cell(2, 2).text = '财务联系人'
-    child_table1.cell(2, 3).text = set_val(str(format_number(row['账务联系人'])))
-
-    # 停送电联系人
-    child_table1.cell(3, 1).text = set_val(format_number(row['联系人.2']))
-    child_table1.cell(3, 2).text = '停送电联系人'
-    child_table1.cell(3, 3).text = set_val(str(format_number(row['停送电联系人'])))
-
-    # 电气联系人
-    child_table1.cell(4, 1).text = set_val(format_number(row['联系人.3']))
-    child_table1.cell(4, 2).text = '电气联系人'
-    child_table1.cell(4, 3).text = set_val(str(format_number(row['电气联系人'])))
-
+    file_name = f"{data_format(row['用户名称'])}_{data_format(row['用户编号'])}.docx"
     # 保存修改后的文档
-    document.save(f'./非居民/{row["用户名称"]}.docx')
+    document.save(f'./非居民/{file_name}')
     
 def set_val(val):
     if val == 'nan' or val == None:
@@ -150,7 +133,7 @@ def gen_word(row):
     if not os.path.exists('./居民'):
         os.mkdir('./居民')
         
-    if (format_number(row['营业执照']) == None or format_number(row['营业执照']) == 'nan') and (format_number(row['事业单位法人证书']) == None or format_number(row['事业单位法人证书']) == 'nan') and (format_number(row['统一社会信用代码证']) == None or format_number(row['统一社会信用代码证']) == 'nan') and (format_number(row['税务登记证']) == None or format_number(row['税务登记证']) == 'nan') and (format_number(row['身份证']) == None or format_number(row['身份证']) == 'nan'):
+    if (str(row['营业执照']) == None or str(row['营业执照']) == 'nan') and (str(row['事业单位法人证书']) == None or str(row['事业单位法人证书']) == 'nan') and (str(row['统一社会信用代码证']) == None or str(row['统一社会信用代码证']) == 'nan') and (str(row['税务登记证']) == None or str(row['税务登记证']) == 'nan') and (str(row['身份证']) == None or str(row['身份证']) == 'nan'):
         gen_word_jumin(row)
     else:
         gen_word_fei_jumin(row)
@@ -167,7 +150,7 @@ def read_excel(fileName):
 })
     df = df.iloc[2:]
     for index, row in df.iterrows():
-        print(type(row)) 
+        #print(row) 
         gen_word(row)
 
 class MainWindow(QMainWindow):
@@ -218,4 +201,5 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = MainWindow()
     sys.exit(app.exec_())
-    # read_excel("客户信息.xlsx")
+
+    #read_excel("客户信息.xlsx")
