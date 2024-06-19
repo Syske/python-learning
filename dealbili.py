@@ -1,3 +1,4 @@
+# coding: utf-8
 import requests
 import parsel
 import re
@@ -5,6 +6,8 @@ import urllib3
 import time
 import json
 import os
+from concurrent.futures import ThreadPoolExecutor
+from tqdm import tqdm
 
 urllib3.disable_warnings()
 requests.packages.urllib3.disable_warnings()
@@ -121,13 +124,25 @@ def get_page_info(url):
     return datas,title
         
 if __name__ == "__main__":
-    base_url = "https://www.bilibili.com/video/BV1uz421C7Ss"
+    # 第三季
+    #base_url = "https://www.bilibili.com/video/BV1uz421C7Ss"
+    # 第一季
+    # base_url = "https://www.bilibili.com/video/BV1mE42137KN"
+    # 第二季
+    # base_url = "https://www.bilibili.com/video/BV1qM4m1C7EB"
+    base_url = "https://www.bilibili.com/video/BV1os421c7AE"
+    # 第三季
+    # url = f'{base_url}/?spm_id_from=333.999.0.0&vd_source=822695a88279c29d1d77cff2810689ad'
+    # 第二季
+    # url = f'{base_url}/?spm_id_from=333.1007.0.0&vd_source=822695a88279c29d1d77cff2810689ad'
     url = f'{base_url}/?spm_id_from=333.999.0.0&vd_source=822695a88279c29d1d77cff2810689ad'
     pages, title = get_page_info(url)
     if not os.path.exists(str(title)):
         os.mkdir(str(title))
-    for page in pages:
-        get_single_page(url=f'{base_url}?p={page[0]}', title=f'{title}/{page[1]}')
-        time.sleep(0.5)
+    with ThreadPoolExecutor(max_workers=10) as threadPool:
+        for i in tqdm(range(len(pages)), desc='video download Processing'):
+            page = pages[i]
+            threadPool.submit(get_single_page, f'{base_url}?p={page[0]}', f'{title}/{page[1]}')
+            time.sleep(0.5)
     # batch_load(559)
     # get_single_page(url, '第一集')
