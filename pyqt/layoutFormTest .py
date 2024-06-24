@@ -10,7 +10,7 @@ class TestWidget(QWidget):
 
     def initUI(self):
         
-        # 创建垂直布局
+        # 创建布局
         main_layout = QFormLayout()
         
         lineEdit = QLineEdit(self)

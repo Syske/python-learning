@@ -100,7 +100,7 @@ if __name__ == "__main__":
         indexs.append(data[0])
         dataMap[data[0]] =  f
     chapters_content = {}
-    chapter_split = {84 : "第一卷 笼中雀", 178 : "第二卷 山水郎", 238 : "第三卷 金错刀", 295 : "第四卷 剑气近", 359 : "第五卷 道观道第五卷 道观道", 455: "第六卷 小夫子", 
+    chapter_split = {84 : "第一卷 笼中雀", 178 : "第二卷 山水郎", 238 : "第三卷 金错刀", 295 : "第四卷 剑气近", 359 : "第五卷 道观道", 455: "第六卷 小夫子", 
                      515 : "第七卷 龙抬头", 570 : "第八卷 思无邪", 684 : "第九卷 天上月", 746 : "第十卷 远游客", 833 : "第十一卷 夜归人", 956 : "第十二卷 选官子",
                      1036 : "第十三卷 破天荒", 1088 : "第十四卷 定风波"}
     indexs.sort()
@@ -120,6 +120,8 @@ if __name__ == "__main__":
             chapter_content = {}
             for splitStr in content_split:
                 after = re.sub(r'<.+>', "" , splitStr)
+                after = after.replace('书书网 更新最快','')
+                after = after.replace('书书网手机版 m.1pwx.com','')
                 chapter1_content += f'<p style="text-indent: 2em;line-height: 2em;font-family: sans-serif;">{after}</p>'
             chapter_content['title'] = title
             chapter_content['content'] = chapter1_content
