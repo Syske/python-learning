@@ -2,7 +2,7 @@ import PIL
 from PIL import Image
 
 target_long_side_pixe=6000
-input_pic = "./DSC_0458.JPG"
+input_pic = "C:\\Users\\syske\\Documents\\WeChat Files\\qq_715448004\\FileStorage\\File\\2024-08\\27\\1.png"
 output_pic = "./test.jpeg"
 output_pic_format = "JPEG"
 
