@@ -20,9 +20,9 @@ pic-uploader:
   aliyun:
     config:
       endpoint: http://oss-cn-hangzhou.aliyuncs.com
-      bucket_name: 111
-      access_key: 111
-      secret_key:  111
+      bucket_name: aaa
+      access_key: aaa
+      secret_key:  aaa
       region: cn-hangzhou
       path: imgs
 '''
@@ -42,8 +42,10 @@ class Settings:
             Path.mkdir(self.CONFIG_DIR)
             
         path = self.CONFIG_DIR.joinpath('config.yaml')
+        print(f"config file path in : {path}")
         if not path.exists():
-            with path.open(mode='w') as f:
+            print(f"init config in {path}, you should replace config to yours")
+            with path.open(mode='w', encoding='utf-8') as f:
                 f.write(template)
 
     def load_config(self):

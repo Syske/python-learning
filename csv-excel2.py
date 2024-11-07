@@ -5,11 +5,12 @@ from openpyxl.utils import get_column_letter
 
 
 #Open an xlsx for reading
-wb = load_workbook('Test.xlsx')
-ws = wb.get_sheet_by_name("Sheet1")
+wb = Workbook()
+# active sheet
+ws = wb.active
 
-dest_filename = "login_info_1371843837865103411.xlsx"
-csv_filename = "C:\\Users\\syske\\Downloads\\login_info_1371843837865103411.csv"
+dest_filename = "vod统计信息.xlsx"
+csv_filename = "C:\\Users\\syske\\Downloads\\vod统计信息.csv"
 
 #Copy in csv
 f = open(csv_filename, encoding='utf-8' ,errors='ignore')
