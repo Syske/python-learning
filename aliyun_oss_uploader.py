@@ -11,6 +11,7 @@ from config import Settings
 
 # 检测当前操作系统
 current_platform = platform.system()
+print(current_platform)
 if current_platform == 'Windows':
     # pip install pywin32
     import win32clipboard as clip
@@ -138,7 +139,7 @@ class AliyunPicUploader(BaseModel):
         """
         将内容写入剪贴板
         """
-        if platform == 'Windows':
+        if current_platform == 'Windows':
             clip.OpenClipboard()
             clip.EmptyClipboard()
             clip.SetClipboardText(text)
