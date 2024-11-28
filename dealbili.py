@@ -6,6 +6,7 @@ import urllib3
 import time
 import json
 import os
+import uuid
 from concurrent.futures import ThreadPoolExecutor
 from tqdm import tqdm
 
@@ -69,6 +70,47 @@ def get_single_page(url, title):
             # 创建mp4文件，写入二进制数据
             with open (title+".mp4", mode = "wb") as f :
                 f.write(video_content)
+                
+                
+def build_player_url(json_data):
+    ts_url = "https://api.bilibili.com/x/click-interface/click/now"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Linux; Android 13; MEIZU 18s Build/TKQ1.221114.001) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.5563.116 Mobile Safari/537.36"
+    }
+    ts_response = requests.get(ts_url, headers=headers)
+    ts_json = ts_response.json()
+    wts = ts_json['data']['now']
+    w_rid = str(uuid.uuid4()).replace('-', '')
+    url =  f'''
+            https://api.bilibili.com/x/player/wbi/playurl?avid={json_data['aid']}&bvid={json_data['bvid']}&cid={json_data['cid']}&qn=0&fnver=0&fnval=4048&fourk=1&gaia_source=external-link&from_client=BROWSER&is_main_page=false&need_fragment=false&isGaiaAvoided=true&session=160081202c9a2b89261bd261cb1a967c&voice_balance=1&web_location=1315873&w_rid={w_rid}&wts={wts}
+            '''
+    return url.replace('\n', '')
+    
+                
+def get_single_page(url):
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Linux; Android 13; MEIZU 18s Build/TKQ1.221114.001) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.5563.116 Mobile Safari/537.36"
+    }
+    response = requests.get(url=f"{url}", headers=headers, verify=False)
+    response.encoding='utf-8'
+    selector1 = parsel.Selector(response.text)
+    open("test-player.html", mode='w', encoding='utf-8').write(response.text)
+    
+                
+def get_player_info(url):
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Linux; Android 13; MEIZU 18s Build/TKQ1.221114.001) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.5563.116 Mobile Safari/537.36"
+    }
+    response = requests.get(url=f"{url}", headers=headers, verify=False)
+    response.encoding='utf-8'
+    selector1 = parsel.Selector(response.text)
+    contents = selector1.css('script[data-vue-meta="true"][type="application/ld+json"]::text')
+    for content in contents:
+        json_data = json.loads(content.get())
+        if json_data['@type'] == 'VideoObject':
+            print(json_data)
+            return json_data['embedUrl']
+    return None
         
 def get_page_info(url):
 # url = f'http://367hsck.cc/'
@@ -78,7 +120,7 @@ def get_page_info(url):
     response = requests.get(url=f"{url}", headers=headers, verify=False)
     response.encoding='utf-8'
     # print(response.text)
-    open("test.html", mode='w', encoding='utf-8').write(response.text)
+    # open("test.html", mode='w', encoding='utf-8').write(response.text)
     # page_url = matchValue(r'strU=\s*"([^"]+)', response.text, 1)
     # print(page_url)
     # parsed_url = urlparse(url)
@@ -107,9 +149,37 @@ def get_page_info(url):
             temp_data = matchValue('window.__INITIAL_STATE__=((.+));\(fun', contentStr, 1)
             # print(temp_data)
             json_data = json.loads(temp_data)
-            pages = json_data['video']['viewInfo']['pages']
-            for page in pages:
-                datas.append((page['page'], page['part']))
+            # pages = json_data['video']['viewInfo']['pages']
+            # print(json_data['video']['viewInfo'])
+            # open("pages.json", mode='w', encoding='utf-8').write(json.dumps(json_data['video']['viewInfo']['ugc_season']['sections'], ensure_ascii=False))
+            sections = json_data['video']['viewInfo']['ugc_season']['sections']
+            for section in sections:
+                # print(section['episodes'])
+                for episode in section['episodes']:
+                    player_url = build_player_url(episode)
+                    response = requests.get(url=player_url, headers=headers)
+                    videos = response.json()['data']['dash']['video']
+                    # print(response.json()['data']['dash']['video'])
+                    print("\n")
+                    max_id = 0
+                    video_url = None
+                    title = episode['title']
+                    for video in videos:
+                        # print(video['id'])
+                        if video['id'] > max_id:
+                            # print(video)
+                            video_url = video['baseUrl']
+                            max_id = video['id']
+                    print(title, max_id, video_url)
+                    time.sleep(0.5) 
+                    # print(title, json_data['readyVideoUrl'])
+                    video_content = requests.get(url=video_url,headers=headers).content
+                    time.sleep(0.5) 
+                    # 创建mp4文件，写入二进制数据
+                    with open (title+".m4s", mode = "wb") as f :
+                        f.write(video_content)
+            # for page in pages:
+            #     datas.append((page['page'], page['part']))
             # print(json_data['video']['viewInfo']['videos'])
             
             # open('test.json',mode='w+', encoding='utf-8').write(json.dumps(json_data['video'], ensure_ascii=False))
@@ -130,19 +200,21 @@ if __name__ == "__main__":
     # base_url = "https://www.bilibili.com/video/BV1mE42137KN"
     # 第二季
     # base_url = "https://www.bilibili.com/video/BV1qM4m1C7EB"
-    base_url = "https://www.bilibili.com/video/BV1os421c7AE"
+    base_url = "https://www.bilibili.com/video/BV18NhTerEo3"
     # 第三季
     # url = f'{base_url}/?spm_id_from=333.999.0.0&vd_source=822695a88279c29d1d77cff2810689ad'
     # 第二季
     # url = f'{base_url}/?spm_id_from=333.1007.0.0&vd_source=822695a88279c29d1d77cff2810689ad'
-    url = f'{base_url}/?spm_id_from=333.999.0.0&vd_source=822695a88279c29d1d77cff2810689ad'
+    url = f'{base_url}/?spm_id_from=333.880.my_history.page.click&vd_source=822695a88279c29d1d77cff2810689ad'
+    # next_url = get_player_info(url=url)
+    # get_single_page(next_url)
     pages, title = get_page_info(url)
-    if not os.path.exists(str(title)):
-        os.mkdir(str(title))
-    with ThreadPoolExecutor(max_workers=10) as threadPool:
-        for i in tqdm(range(len(pages)), desc='video download Processing'):
-            page = pages[i]
-            threadPool.submit(get_single_page, f'{base_url}?p={page[0]}', f'{title}/{page[1]}')
-            time.sleep(0.5)
+    # if not os.path.exists(str(title)):
+    #     os.mkdir(str(title))
+    # with ThreadPoolExecutor(max_workers=10) as threadPool:
+    #     for i in tqdm(range(len(pages)), desc='video download Processing'):
+    #         page = pages[i]
+    #         threadPool.submit(get_single_page, f'{base_url}?p={page[0]}', f'{title}/{page[1]}')
+    #         time.sleep(0.5)
     # batch_load(559)
     # get_single_page(url, '第一集')

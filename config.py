@@ -42,7 +42,9 @@ class Settings:
             Path.mkdir(self.CONFIG_DIR)
             
         path = self.CONFIG_DIR.joinpath('config.yaml')
+        print(f"config file path in : {path}")
         if not path.exists():
+            print(f"init config in {path}, you should replace config to yours")
             with path.open(mode='w', encoding='utf-8') as f:
                 f.write(template)
 

@@ -2,6 +2,7 @@ import requests
 import parsel
 import re
 import time
+import os
 
 def get_single_page(pageNum):
     baseUrl = "https://.info"
@@ -17,7 +18,7 @@ def get_single_page(pageNum):
         # print(title)
         # print(baseUrl + href)
         scriptContent = content.css("script::text").get()
-        # print(scriptContent)
+        print(scriptContent)
         picUrl = matchValue(r"pic:\s*'([^']+)'", scriptContent, 1)
         video_url = matchValue(r"url:\s*'([^']+)'", scriptContent, 1)
         datas.append((title, baseUrl + href, baseUrl + picUrl, video_url))
@@ -32,18 +33,22 @@ def build_content(datas):
     return content
 
 def batch_load(total_page):
-    file_name = "./titiwo/titiwo{}.md"
+    path = "./titiwo"
+    file_name = "{}/titiwo{}.md"
+    
+    if not os.path.exists(path):
+        os.mkdir(path)
     
     count = 5
     file_content = ''
     for i in range(total_page):
-        if i > 200:
+        if i > 0:
             file_content += build_content(get_single_page(pageNum=(i + 1)))
             print(f"第{i+1}页")
-            if (i + 1) % 50 == 0 or total_page == i + 1:
+            if (i + 1) % 10 == 0 or total_page == i + 1:
                 count += 1
                 print(file_content)
-                with open(file_name.format(count), 'a+', encoding='utf-8') as f:
+                with open(file_name.format(path, count), 'w+', encoding='utf-8') as f:
                     f.write(file_content)
                     file_content = ''
             time.sleep(0.5) 
