@@ -8,6 +8,14 @@ import uuid
 from pydantic import BaseModel
 from config import Settings
 
+# 还需要安装如下依赖
+# pip install pyyaml
+# pip install numpy
+# 另外还需要根据操作系统平台安装下面的依赖
+# win平台安装这个：
+# pip install pywin32
+# linux安装pyqt5:
+# pip install pyqt5
 
 # 检测当前操作系统
 current_platform = platform.system()
